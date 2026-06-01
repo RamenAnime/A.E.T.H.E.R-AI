@@ -1,0 +1,43 @@
+[workflow]
+name = "learn_topic"
+
+[[workflow.nodes]]
+id = "plan"
+role = "planner"
+description = "Create a study plan"
+
+[[workflow.nodes]]
+id = "research"
+role = "research"
+description = "Research and synthesize concepts"
+
+[[workflow.nodes]]
+id = "validate"
+role = "validation"
+description = "Validate facts"
+
+[[workflow.nodes]]
+id = "synthesize"
+role = "synthesizer"
+description = "Build study sheet"
+
+[[workflow.nodes]]
+id = "memory"
+role = "memory"
+description = "Store in local memory"
+
+[[workflow.edges]]
+source = "plan"
+target = "research"
+
+[[workflow.edges]]
+source = "research"
+target = "validate"
+
+[[workflow.edges]]
+source = "validate"
+target = "synthesize"
+
+[[workflow.edges]]
+source = "synthesize"
+target = "memory"

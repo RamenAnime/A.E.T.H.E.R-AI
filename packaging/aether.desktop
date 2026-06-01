@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=A.E.T.H.E.R.
+GenericName=Local AI Assistant
+Comment=Autonomous voice-first local AI assistant
+Exec=aether-app
+Icon=aether
+Terminal=false
+Categories=Utility;Development;AudioVideo;
+Keywords=AI;assistant;aether;voice;local;llm;
+StartupNotify=true

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0a0b" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="AETHER" />
+  <link rel="manifest" href="/static/manifest.json" />
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png" />
+  <title>A.E.T.H.E.R.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/app.css" />
+</head>
+<body>
+  <div id="pulse" class="pulse idle" aria-hidden="true"></div>
+  <div class="hud-backdrop" aria-hidden="true"></div>
+
+  <div id="app" class="app">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand">
+        <span class="hud-reticle" aria-hidden="true"></span>
+        <div>
+          <h1 id="brand-title">A.E.T.H.E.R.</h1>
+          <p class="hud-label" id="brand-acronym">Autonomous · Engineering · Thinking · Heuristic · Expert · Responder</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="chat">Chat</button>
+        <button class="nav-item" data-view="build">Build App</button>
+        <button class="nav-item" data-view="autonomy">Autonomy</button>
+        <button class="nav-item" data-view="master">Learn & Build</button>
+        <button class="nav-item" data-view="home">Smart Home</button>
+        <button class="nav-item" data-view="workflow">Workflows</button>
+        <button class="nav-item" data-view="agents">Agents</button>
+        <button class="nav-item" data-view="memory">Memory</button>
+        <button class="nav-item" data-view="printer">Ender 3</button>
+        <button class="nav-item" data-view="settings">Settings</button>
+      </nav>
+
+      <div class="sidebar-section">
+        <div class="section-head">
+          <span class="hud-label">Sessions</span>
+          <button id="new-chat" class="icon-btn" title="New chat">+</button>
+        </div>
+        <ul id="session-list" class="session-list"></ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <div id="health-pill" class="health-pill checking">Checking…</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="toggle-sidebar" class="icon-btn mobile-only" aria-label="Menu">☰</button>
+          <span id="view-title" class="view-title">Chat</span>
+        </div>
+        <div class="topbar-right">
+          <button id="voice-toggle" class="voice-btn" title="Hands-free voice mode">Voice</button>
+          <select id="model-select" class="model-select" title="Model"></select>
+          <button id="toggle-panel" class="icon-btn" title="System panel">◧</button>
+        </div>
+      </header>
+
+      <!-- Chat view -->
+      <section id="view-chat" class="view active">
+        <div id="voice-status" class="voice-status hidden">
+          <span class="voice-orb"></span>
+          <span id="voice-status-text">Listening…</span>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">✦</div>
+            <h2 id="greeting">Hello</h2>
+            <p>Ask anything. Your AI runs locally: private and on your machine.</p>
+            <div class="quick-actions">
+              <button class="chip" data-prompt="Explain Kubernetes in simple terms">Learn Kubernetes</button>
+              <button class="chip" data-prompt="Write a Python script to rename files in a folder">Code helper</button>
+              <button class="chip" data-workflow="Python asyncio">Run learn workflow</button>
+            </div>
+          </div>
+        </div>
+        <form id="chat-form" class="chat-form">
+          <button type="button" id="mic-btn" class="mic-btn" title="Voice input">🎤</button>
+          <textarea id="chat-input" rows="1" placeholder="Message A.E.T.H.E.R…" autocomplete="off"></textarea>
+          <label class="speak-toggle" title="Speak responses">
+            <input type="checkbox" id="speak-replies" />
+            <span>Voice</span>
+          </label>
+          <button type="submit" id="send-btn" class="send-btn">Send</button>
+        </form>
+      </section>
+
+      <!-- Build App -->
+      <section id="view-build" class="view">
+        <div class="panel-card master-card">
+          <h2>Engineer an application</h2>
+          <p>Describe what to build. A.E.T.H.E.R. plans the project and writes real, runnable files locally using your code model.</p>
+          <label class="field-label">What should I build?</label>
+          <textarea id="build-spec" rows="3" placeholder="A FastAPI backend for an inventory system with SQLite, JWT auth, and REST endpoints"></textarea>
+          <label class="field-label">Project name (optional)</label>
+          <input id="build-name" type="text" placeholder="inventory-api" />
+          <div class="auto-controls">
+            <button id="run-build-app" class="primary-btn" type="button">Build it</button>
+            <span id="build-app-state" class="auto-state">idle</span>
+          </div>
+          <div id="build-app-log" class="workflow-log"></div>
+        </div>
+      </section>
+
+      <!-- Smart Home -->
+      <section id="view-home" class="view">
+        <div class="panel-card master-card">
+          <h2>Smart home</h2>
+          <p id="home-status">Connecting to Home Assistant…</p>
+          <div class="auto-controls">
+            <input id="home-search" type="text" placeholder="Filter devices…" />
+            <button id="home-refresh" class="chip" type="button">Refresh</button>
+          </div>
+          <div id="home-entities" class="home-entities"></div>
+        </div>
+      </section>
+
+      <!-- Autonomy -->
+      <section id="view-autonomy" class="view">
+        <div class="panel-card master-card">
+          <h2>Autonomous mode</h2>
+          <p>Give a mission and the limits it must obey. It self-learns and builds on its own. You can stop it instantly.</p>
+
+          <label class="field-label">Mission</label>
+          <input id="auto-mission" type="text" placeholder="Become expert at robotics and 3D modeling, then design a printable robot" />
+
+          <label class="field-label">Restrictions (your rules: typed in plain words)</label>
+          <textarea id="auto-restrictions" rows="3" placeholder="do not print without asking, never spend money, stay on robotics topics, do not delete files"></textarea>
+
+          <div class="auto-limits">
+            <label>Max steps <input id="auto-iters" type="number" value="8" min="1" max="50" /></label>
+            <label>Minutes <input id="auto-minutes" type="number" value="20" min="1" max="240" /></label>
+            <label class="speak-toggle"><input type="checkbox" id="auto-print" /><span>Allow printing</span></label>
+            <label class="speak-toggle"><input type="checkbox" id="auto-review" checked /><span>LLM safety review</span></label>
+          </div>
+
+          <div class="auto-controls">
+            <button id="auto-start" class="primary-btn">Start</button>
+            <button id="auto-pause" class="chip" type="button">Pause</button>
+            <button id="auto-resume" class="chip" type="button">Resume</button>
+            <button id="auto-stop" class="stop-btn" type="button">STOP</button>
+            <span id="auto-state" class="auto-state">idle</span>
+          </div>
+
+          <div id="auto-approval" class="auto-approval hidden">
+            <strong>Approval needed</strong>
+            <p id="auto-approval-text"></p>
+            <button id="auto-approve-yes" class="primary-btn" type="button">Approve</button>
+            <button id="auto-approve-no" class="chip" type="button">Deny</button>
+          </div>
+
+          <div id="auto-log" class="workflow-log"></div>
+        </div>
+      </section>
+
+      <!-- Master learn + build -->
+      <section id="view-master" class="view">
+        <div class="panel-card master-card">
+          <h2>Learn then build</h2>
+          <p>Step 1: deep-learn a topic at graduate level. Step 2: generate CAD, parts list, wiring, and optional printer upload.</p>
+          <label class="field-label">Topic to learn</label>
+          <input id="master-topic" type="text" placeholder="robotic engineering and 3D modeling" />
+          <button id="run-learn" class="primary-btn">1. Deep learn topic</button>
+          <hr class="divider" />
+          <label class="field-label">Build project (after learning)</label>
+          <textarea id="master-project" rows="3" placeholder="Make a 3D CAD model of a modular robot habitat I can print, with wiring and parts list"></textarea>
+          <label class="speak-toggle"><input type="checkbox" id="master-printer" /><span>Send STL to OctoPrint (if configured)</span></label>
+          <button id="run-build" class="primary-btn">2. Build CAD + BOM + wiring</button>
+          <div id="master-log" class="workflow-log"></div>
+        </div>
+      </section>
+
+      <!-- Workflow view -->
+      <section id="view-workflow" class="view">
+        <div class="panel-card">
+          <h2>Multi-agent learn workflow</h2>
+          <p>Planner → Research → Validation → Synthesizer → Memory</p>
+          <div class="workflow-form">
+            <input id="workflow-topic" type="text" placeholder="Topic to learn (e.g. Rust ownership)" />
+            <label class="speak-toggle"><input type="checkbox" id="workflow-speak" /><span>Voice updates</span></label>
+            <button id="run-workflow" class="primary-btn">Run workflow</button>
+          </div>
+          <div id="workflow-log" class="workflow-log"></div>
+        </div>
+      </section>
+
+      <!-- Agents view -->
+      <section id="view-agents" class="view">
+        <div id="agents-grid" class="agents-grid"></div>
+      </section>
+
+      <!-- Memory view -->
+      <section id="view-memory" class="view">
+        <div id="memory-list" class="memory-list"></div>
+      </section>
+
+      <!-- Printer view -->
+      <section id="view-printer" class="view">
+        <div class="panel-card">
+          <h2>Ender 3 V3</h2>
+          <p id="printer-profile-info" class="hint">Loading…</p>
+          <div id="printer-status-box" class="printer-status-box">Checking printer…</div>
+          <p class="hint">Slice STLs in Creality Print, then upload G-code via OctoPrint or print from SD.</p>
+        </div>
+      </section>
+
+      <!-- Settings view -->
+      <section id="view-settings" class="view">
+        <div class="panel-card">
+          <h2>Settings</h2>
+          <div id="install-pwa" class="install-banner hidden">
+            <strong>Install on Android</strong>
+            <p>Tap Install to add A.E.T.H.E.R. to your home screen like an app.</p>
+            <button id="btn-install-pwa" class="primary-btn" type="button">Install app</button>
+          </div>
+          <label>Server URL (for phone on Wi-Fi)
+            <input id="settings-api-base" type="url" placeholder="http://192.168.1.10:8787" />
+          </label>
+          <p class="hint">Leave empty when using this browser on the same PC. On your phone, enter your PC IP from <code>aether web --lan</code>.</p>
+          <label>Default model<input id="settings-model" type="text" /></label>
+          <label>ElevenLabs API key (optional)<input id="settings-eleven" type="password" placeholder="sk-…" /></label>
+          <button id="save-settings" class="primary-btn">Save</button>
+          <button id="test-connection" class="chip" type="button" style="margin-top:12px">Test connection</button>
+        </div>
+      </section>
+    </main>
+
+    <aside id="system-panel" class="system-panel open">
+      <div class="panel-head">
+        <span class="hud-label">System</span>
+        <button id="close-panel" class="icon-btn">×</button>
+      </div>
+      <div class="panel-body">
+        <div class="stat-block">
+          <div class="stat-label">Status</div>
+          <div id="sys-ollama" class="stat-value">-</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">Model</div>
+          <div id="sys-model" class="stat-value mono">-</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">Agent team</div>
+          <ul id="sys-agents" class="sys-agents"></ul>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">Recent traces</div>
+          <ul id="sys-traces" class="sys-traces"></ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div id="banner-offline" class="banner-offline hidden">
+    <span class="dot"></span>
+    Cannot reach Ollama: start Ollama and run <code>ollama pull llama3.1:8b</code>
+  </div>
+
+  <script src="/static/js/app.js" type="module"></script>
+</body>
+</html>
