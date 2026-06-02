@@ -1,0 +1,112 @@
+# Phase 2: runs after /approve-continue on a health-review issue.
+name: Slack enhancement continue
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.issue.pull_request == null &&
+      contains(github.event.comment.body, '/approve-continue') &&
+      (
+        contains(join(github.event.issue.labels.*.name, ','), 'health-review') ||
+        contains(join(github.event.issue.labels.*.name, ','), 'automated')
+      )
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Enhancement analysis
+        run: |
+          {
+            echo "## Enhancement review (automated)"
+            echo ""
+            echo "**Repo:** ${{ github.repository }}"
+            echo "**Triggered by:** @${{ github.event.comment.user.login }}"
+            echo ""
+            if [ -f package.json ]; then
+              npm ci 2>/dev/null || npm install
+              echo "### npm outdated"
+              echo '```'
+              npm outdated 2>/dev/null || echo "none"
+              echo '```'
+              echo "### npm audit (high+)"
+              echo '```'
+              npm audit --audit-level=high 2>/dev/null || true
+              echo '```'
+            fi
+            if [ -f pyproject.toml ]; then
+              pip install -e . 2>/dev/null || true
+              echo "### Python: run tests locally before large changes"
+              echo '```'
+              pytest tests/ -q 2>/dev/null || echo "pytest skipped"
+              echo '```'
+            fi
+            if [ -f mcp-arch.sh ]; then
+              echo "### Installer repo"
+              echo "- Re-test fresh Arch + existing Arch install paths in docs"
+              echo "- Run \`system-verify\` on a test VM after changes"
+            fi
+            if [ ! -f package.json ] && [ ! -f pyproject.toml ] && [ ! -f mcp-arch.sh ]; then
+              echo "### Docs repo"
+              echo "- Keep README and portfolio copy aligned with the main app"
+              echo "- Verify links to ramenanime.com and GitHub repos"
+            fi
+            echo ""
+            echo "---"
+            echo "## Second stopping point"
+            echo "Suggestions only. No commits. Implement in Cursor or open a PR manually."
+            echo "Comment \`/stop\` when done."
+          } | tee enhancement-report.md
+
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: fs.readFileSync('enhancement-report.md', 'utf8'),
+            });
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['enhancement-reviewed'],
+            });
+
+      - name: Build Slack payload
+        id: slack
+        run: |
+          payload=$(jq -n \
+            --arg repo "${{ github.repository }}" \
+            --arg url "${{ github.event.issue.html_url }}" \
+            --arg num "${{ github.event.issue.number }}" \
+            '{
+              text: ("📋 Enhancement review — " + $repo),
+              blocks: [
+                { type: "section", text: { type: "mrkdwn", text: ("*" + $repo + "* enhancement pass done.\n<" + $url + "|Issue #" + $num + ">\n\n*Stopping point:* review the comment. No auto-commits.") } }
+              ]
+            }')
+          echo "payload=$(echo "$payload" | jq -c .)" >> "$GITHUB_OUTPUT"
+
+      - name: Post to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_PAYLOAD: ${{ steps.slack.outputs.payload }}
+        run: node .github/scripts/slack-post.mjs

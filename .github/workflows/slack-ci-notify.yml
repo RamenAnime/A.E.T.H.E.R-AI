@@ -1,0 +1,64 @@
+# Notify Slack when the main CI workflow finishes (pass or fail).
+name: Slack CI notify
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion != 'cancelled' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Slack message
+        id: msg
+        env:
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          COMMIT: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          emoji="✅"
+          color="#2eb886"
+          if [ "$CONCLUSION" != "success" ]; then
+            emoji="❌"
+            color="#e01e5a"
+          fi
+          payload=$(jq -n \
+            --arg emoji "$emoji" \
+            --arg repo "$REPO" \
+            --arg branch "$BRANCH" \
+            --arg conclusion "$CONCLUSION" \
+            --arg url "$RUN_URL" \
+            --arg commit "$COMMIT" \
+            --arg color "$color" \
+            '{
+              text: ($emoji + " CI " + $conclusion + ": " + $repo),
+              attachments: [{
+                color: $color,
+                fields: [
+                  { title: "Repository", value: $repo, short: true },
+                  { title: "Branch", value: $branch, short: true },
+                  { title: "Conclusion", value: $conclusion, short: true },
+                  { title: "Commit", value: ($commit[0:7]), short: true }
+                ],
+                actions: [{ type: "button", text: "View run", url: $url }]
+              }]
+            }')
+          echo "payload<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$payload" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Post to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_PAYLOAD: ${{ steps.msg.outputs.payload }}
+        run: node .github/scripts/slack-post.mjs

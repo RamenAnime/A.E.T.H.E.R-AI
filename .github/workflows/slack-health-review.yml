@@ -1,0 +1,103 @@
+# Scheduled + manual health scan. Creates a GitHub issue and Slack STOPPING POINT.
+name: Slack health and review
+
+on:
+  schedule:
+    - cron: "0 14 * * 1" # Monday 14:00 UTC
+  workflow_dispatch:
+    inputs:
+      create_issue:
+        description: "Create GitHub issue for approval"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Run health report
+        id: health
+        continue-on-error: true
+        run: node .github/scripts/project-health.mjs
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report
+          path: health-report.md
+
+      - name: Create stopping-point issue
+        if: github.event_name == 'schedule' || inputs.create_issue != false
+        uses: actions/github-script@v7
+        id: issue
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('health-report.md', 'utf8');
+            const pass = '${{ steps.health.outcome }}' === 'success';
+            const title = `[Auto health] ${context.repo.repo} — ${pass ? 'passed' : 'needs attention'} (${new Date().toISOString().slice(0, 10)})`;
+            const footer = `
+
+            ---
+
+            ## Stopping point (human input required)
+
+            Automated checks have finished. **Nothing else runs until you approve.**
+
+            1. Read the report above.
+            2. Comment on this issue: \`/approve-continue\` to run the enhancement review pass (suggestions only).
+            3. Comment \`/stop\` to skip this cycle.
+
+            _Workflow: \`slack-health-review.yml\`_
+            `;
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body: body + footer,
+              labels: ['automated', 'health-review'],
+            });
+            core.setOutput('number', String(issue.data.number));
+            core.setOutput('url', issue.data.html_url);
+
+      - name: Build Slack payload
+        id: slack
+        if: steps.issue.outputs.url != ''
+        run: |
+          pass="${{ steps.health.outcome }}"
+          issue_url="${{ steps.issue.outputs.url }}"
+          issue_num="${{ steps.issue.outputs.number }}"
+          repo="${{ github.repository }}"
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          if [ "$pass" = "success" ]; then emoji="✅"; else emoji="⚠️"; fi
+          payload=$(jq -n \
+            --arg emoji "$emoji" \
+            --arg repo "$repo" \
+            --arg issue "$issue_url" \
+            --arg num "$issue_num" \
+            --arg run "$run_url" \
+            '{
+              text: ($emoji + " STOPPING POINT — " + $repo + " health review"),
+              blocks: [
+                { type: "header", text: { type: "plain_text", text: "Stopping point: your input needed" } },
+                { type: "section", text: { type: "mrkdwn", text: ("*" + $repo + "* finished automated health checks.\n\n• Review issue: <" + $issue + "|#" + $num + ">\n• Workflow: <" + $run + "|view run>\n\n*Next step:* comment `/approve-continue` on the issue to run enhancement suggestions.") } }
+              ]
+            }')
+          echo "payload=$(echo "$payload" | jq -c .)" >> "$GITHUB_OUTPUT"
+
+      - name: Post stopping point to Slack
+        if: steps.slack.outputs.payload != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_PAYLOAD: ${{ steps.slack.outputs.payload }}
+        run: node .github/scripts/slack-post.mjs
