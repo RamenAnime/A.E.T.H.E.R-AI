@@ -81,11 +81,11 @@ def describe_capabilities(settings: Settings) -> List[Dict[str, Any]]:
         },
         {
             "id": "multi_llm",
-            "name": "Multi-model routing (local)",
-            "description": "Routes each task to the best local model (general, code, embeddings, AirLLM).",
-            "how": "Configure OLLAMA_* models; USE_AIRLLM=true for big quantized models",
+            "name": "Multi-model routing (local + optional DeepSeek)",
+            "description": "Routes each task to the best model (Ollama locally, DeepSeek cloud when configured).",
+            "how": "Configure OLLAMA_* models; set DEEPSEEK_API_KEY for cloud (see integrations/deepseek/)",
             "available": True,
-            "enhanced": settings.use_airllm,
+            "enhanced": settings.use_airllm or bool(settings.deepseek_api_key),
         },
         {
             "id": "mobile",
