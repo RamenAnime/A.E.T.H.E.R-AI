@@ -237,13 +237,24 @@ def build_docx(path: Path) -> None:
     doc.save(path)
 
 
+def _visual_bullets(job: dict) -> list[str]:
+    if job["dates"].endswith("Present"):
+        return job["bullets"][:5]
+    if job["dates"].startswith("202"):
+        return job["bullets"][:3]
+    return job["bullets"][:2]
+
+
 def build_html(path: Path) -> None:
-    achievements_html = "\n".join(f"<li>{a}</li>" for a in ACHIEVEMENTS)
-    skills_html = "\n".join(f"<li>{s}</li>" for s in SKILLS_ATS)
+    skills_inline = (
+        "Windows Server, Linux, UniFi, VLAN, CI/CD, Git, Docker, Python, SonicWall, Wazuh SIEM, "
+        "Firewall Forensics, React, TypeScript, Node.js, MySQL, tRPC, TrueNAS, Karmak DMS, "
+        "Multi-Site Infrastructure, Incident Response, SLA Management, Vendor Coordination"
+    )
 
     experience_html = ""
     for job in EXPERIENCE:
-        bullets = "\n".join(f"<li>{b}</li>" for b in job["bullets"])
+        bullets = "\n".join(f"<li>{b}</li>" for b in _visual_bullets(job))
         experience_html += f"""
         <article class="job">
           <div class="job-header">
@@ -260,7 +271,10 @@ def build_html(path: Path) -> None:
         </article>
         """
 
-    project_bullets = "\n".join(f"<li>{b}</li>" for b in PROJECT["bullets"])
+    project_bullets = "\n".join(
+        f"<li>{b}</li>"
+        for b in PROJECT["bullets"][:3]
+    )
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -271,7 +285,7 @@ def build_html(path: Path) -> None:
   <style>
     @page {{
       size: letter;
-      margin: 0.55in 0.65in;
+      margin: 0.4in 0.55in;
     }}
     :root {{
       --ink: #1a2332;
@@ -284,8 +298,8 @@ def build_html(path: Path) -> None:
     body {{
       font-family: "Segoe UI", Calibri, Arial, sans-serif;
       color: var(--ink);
-      line-height: 1.45;
-      font-size: 10.5pt;
+      line-height: 1.35;
+      font-size: 8.8pt;
       background: #f4f7fb;
     }}
     .page {{
@@ -295,48 +309,51 @@ def build_html(path: Path) -> None:
       box-shadow: 0 8px 30px rgba(26, 35, 50, 0.08);
     }}
     header {{
-      padding: 28px 34px 22px;
+      padding: 18px 28px 14px;
       border-bottom: 3px solid var(--accent);
       background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
     }}
     h1 {{
-      font-size: 28pt;
+      font-size: 22pt;
       letter-spacing: 0.04em;
       font-weight: 700;
       color: var(--ink);
     }}
     .subtitle {{
-      margin-top: 4px;
-      font-size: 13pt;
+      margin-top: 2px;
+      font-size: 11.5pt;
       color: var(--accent);
       font-weight: 600;
     }}
     .contact {{
-      margin-top: 12px;
+      margin-top: 8px;
       display: flex;
       flex-wrap: wrap;
-      gap: 8px 18px;
+      gap: 6px 14px;
       color: var(--muted);
-      font-size: 9.5pt;
+      font-size: 8.8pt;
     }}
     .contact a {{
       color: var(--accent);
       text-decoration: none;
     }}
     main {{
-      padding: 22px 34px 30px;
+      padding: 14px 28px 18px;
     }}
     section {{
-      margin-bottom: 18px;
+      margin-bottom: 9px;
+    }}
+    .summary {{
+      font-size: 9pt;
     }}
     h2 {{
-      font-size: 11pt;
+      font-size: 10pt;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--accent);
       border-bottom: 1px solid var(--line);
-      padding-bottom: 4px;
-      margin-bottom: 10px;
+      padding-bottom: 2px;
+      margin-bottom: 6px;
     }}
     p {{ color: var(--ink); }}
     .summary {{ color: var(--muted); }}
@@ -344,26 +361,20 @@ def build_html(path: Path) -> None:
       padding-left: 18px;
     }}
     li {{
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       color: var(--ink);
     }}
-    .skills-grid {{
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 6px;
-      list-style: none;
-      padding: 0;
-    }}
-    .skills-grid li {{
+    .skills-inline {{
       background: var(--accent-soft);
       border-left: 3px solid var(--accent);
-      padding: 7px 10px;
-      border-radius: 4px;
-      margin: 0;
-      font-size: 9.8pt;
+      padding: 6px 9px;
+      border-radius: 3px;
+      font-size: 8.4pt;
+      line-height: 1.35;
+      color: var(--ink);
     }}
     .job {{
-      margin-bottom: 14px;
+      margin-bottom: 9px;
       page-break-inside: avoid;
     }}
     .job-header {{
@@ -374,19 +385,19 @@ def build_html(path: Path) -> None:
       margin-bottom: 6px;
     }}
     .job h3 {{
-      font-size: 11pt;
+      font-size: 10pt;
       font-weight: 700;
       color: var(--ink);
     }}
     .company {{
       color: var(--muted);
-      font-size: 10pt;
-      margin-top: 2px;
+      font-size: 9pt;
+      margin-top: 1px;
     }}
     .job-meta {{
       text-align: right;
       color: var(--muted);
-      font-size: 9.5pt;
+      font-size: 8.8pt;
       white-space: nowrap;
     }}
     .job-meta span {{
@@ -430,11 +441,7 @@ def build_html(path: Path) -> None:
       </section>
       <section>
         <h2>Core Skills</h2>
-        <ul class="skills-grid">{skills_html}</ul>
-      </section>
-      <section>
-        <h2>Key Achievements</h2>
-        <ul>{achievements_html}</ul>
+        <p class="skills-inline">{skills_inline}</p>
       </section>
       <section>
         <h2>Professional Experience</h2>

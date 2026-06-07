@@ -7,7 +7,7 @@
   <style>
     @page {
       size: letter;
-      margin: 0.55in 0.65in;
+      margin: 0.4in 0.55in;
     }
     :root {
       --ink: #1a2332;
@@ -20,8 +20,8 @@
     body {
       font-family: "Segoe UI", Calibri, Arial, sans-serif;
       color: var(--ink);
-      line-height: 1.45;
-      font-size: 10.5pt;
+      line-height: 1.35;
+      font-size: 8.8pt;
       background: #f4f7fb;
     }
     .page {
@@ -31,48 +31,51 @@
       box-shadow: 0 8px 30px rgba(26, 35, 50, 0.08);
     }
     header {
-      padding: 28px 34px 22px;
+      padding: 18px 28px 14px;
       border-bottom: 3px solid var(--accent);
       background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
     }
     h1 {
-      font-size: 28pt;
+      font-size: 22pt;
       letter-spacing: 0.04em;
       font-weight: 700;
       color: var(--ink);
     }
     .subtitle {
-      margin-top: 4px;
-      font-size: 13pt;
+      margin-top: 2px;
+      font-size: 11.5pt;
       color: var(--accent);
       font-weight: 600;
     }
     .contact {
-      margin-top: 12px;
+      margin-top: 8px;
       display: flex;
       flex-wrap: wrap;
-      gap: 8px 18px;
+      gap: 6px 14px;
       color: var(--muted);
-      font-size: 9.5pt;
+      font-size: 8.8pt;
     }
     .contact a {
       color: var(--accent);
       text-decoration: none;
     }
     main {
-      padding: 22px 34px 30px;
+      padding: 14px 28px 18px;
     }
     section {
-      margin-bottom: 18px;
+      margin-bottom: 9px;
+    }
+    .summary {
+      font-size: 9pt;
     }
     h2 {
-      font-size: 11pt;
+      font-size: 10pt;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--accent);
       border-bottom: 1px solid var(--line);
-      padding-bottom: 4px;
-      margin-bottom: 10px;
+      padding-bottom: 2px;
+      margin-bottom: 6px;
     }
     p { color: var(--ink); }
     .summary { color: var(--muted); }
@@ -80,26 +83,20 @@
       padding-left: 18px;
     }
     li {
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       color: var(--ink);
     }
-    .skills-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 6px;
-      list-style: none;
-      padding: 0;
-    }
-    .skills-grid li {
+    .skills-inline {
       background: var(--accent-soft);
       border-left: 3px solid var(--accent);
-      padding: 7px 10px;
-      border-radius: 4px;
-      margin: 0;
-      font-size: 9.8pt;
+      padding: 6px 9px;
+      border-radius: 3px;
+      font-size: 8.4pt;
+      line-height: 1.35;
+      color: var(--ink);
     }
     .job {
-      margin-bottom: 14px;
+      margin-bottom: 9px;
       page-break-inside: avoid;
     }
     .job-header {
@@ -110,19 +107,19 @@
       margin-bottom: 6px;
     }
     .job h3 {
-      font-size: 11pt;
+      font-size: 10pt;
       font-weight: 700;
       color: var(--ink);
     }
     .company {
       color: var(--muted);
-      font-size: 10pt;
-      margin-top: 2px;
+      font-size: 9pt;
+      margin-top: 1px;
     }
     .job-meta {
       text-align: right;
       color: var(--muted);
-      font-size: 9.5pt;
+      font-size: 8.8pt;
       white-space: nowrap;
     }
     .job-meta span {
@@ -166,19 +163,7 @@
       </section>
       <section>
         <h2>Core Skills</h2>
-        <ul class="skills-grid"><li>Systems Administration: Windows Server, Linux (RHEL, Ubuntu, Arch), UniFi Networking, VLAN Routing, Bare-Metal & Cloud Provisioning, TrueNAS SCALE, CRM & Ticket Platforms</li>
-<li>DevOps & Automation: CI/CD Workflows, Git, GitHub, Containerized Deployments, Automation Engineering, Render, Python Scripting</li>
-<li>Security & Incident Response: SonicWall GMS, Firewall Forensics, Wazuh SIEM, Endpoint Threat Hunting, Malware Identification, Network Segmentation, VPN Controls, Botnet & Intrusion Analysis</li>
-<li>Software Development: React, TypeScript, Node.js, Vite, tRPC, Hono, REST APIs, Drizzle ORM, MySQL, TiDB Cloud, Vitest, HTML/Excel Dashboards</li>
-<li>Platforms & Leadership: Karmak DMS, Google Workspace, Microsoft Office, Dell PowerEdge Servers, Multi-Site IT Infrastructure, SLA Compliance, Vendor Coordination, Team Onboarding, Root Cause Analysis</li></ul>
-      </section>
-      <section>
-        <h2>Key Achievements</h2>
-        <ul><li>Led active security incident response at Kenworth of Jacksonville, coordinating with SonicWall vendor (Western NRG) and a third-party compliance team; analyzed firewall forensics across 9,000+ malware block events, identified attack initiator hosts, VPN bypass attempts, and data-harvesting browser extensions; directed Wazuh SIEM deployment across the environment.</li>
-<li>Built and launched a production-ready global marketplace platform with a 42-table relational database, real-time engines, and end-to-end cloud infrastructure as a solo technical project.</li>
-<li>Engineered a live digital dispatch board and internal ticketing system that replaced legacy paper processing, eliminating data lag and improving cross-department workflow tracking.</li>
-<li>Administered distributed multi-site IT systems across several locations with zero external vendor dependency, including hardware procurement, UniFi network architectures, and server provisioning.</li>
-<li>Coached and led a remote technical escalation team of 13 staff in a 24/7 mission-critical Tier 3 environment, handling 500+ advanced technical cases weekly while exceeding SLA and QA baselines.</li></ul>
+        <p class="skills-inline">Windows Server, Linux, UniFi, VLAN, CI/CD, Git, Docker, Python, SonicWall, Wazuh SIEM, Firewall Forensics, React, TypeScript, Node.js, MySQL, tRPC, TrueNAS, Karmak DMS, Multi-Site Infrastructure, Incident Response, SLA Management, Vendor Coordination</p>
       </section>
       <section>
         <h2>Professional Experience</h2>
@@ -198,8 +183,7 @@
 <li>Lead active cybersecurity incident response: analyzed SonicWall GMS firewall forensics identifying malware-contacting endpoints, VPN-bypass hosts, a data-harvesting browser extension (ntp2.mywavehome.net / wavebrowser), and an attack-initiating internal host; coordinate with firewall vendor and third-party compliance team on forensics timeline and scope. Direct Wazuh SIEM deployment for ongoing endpoint monitoring.</li>
 <li>Engineered, tested, and deployed a custom digital dispatch system, owning the full software lifecycle from development through production, eliminating business status lag and manual paper workflows.</li>
 <li>Perform complete system administration for the enterprise Dealer Management System (Karmak DMS), overseeing access management, data reporting, workflow compliance, and complex transaction tracking.</li>
-<li>Manage hardware lifecycle pipelines including bare-metal server configuration, workstation deployment, and client configuration, reducing technical response intervals from days to under two hours.</li>
-<li>Act as critical escalation point for infrastructure faults, vendor interconnections, and network-attached appliances, maintaining 100% operational availability across distributed logistics and parts facilities.</li></ul>
+<li>Manage hardware lifecycle pipelines including bare-metal server configuration, workstation deployment, and client configuration, reducing technical response intervals from days to under two hours.</li></ul>
         </article>
         
         <article class="job">
@@ -215,8 +199,7 @@
           </div>
           <ul><li>Promoted from service tracking to operations foreman to orchestrate technological execution, resource distribution, and technical workflows for a high-output maintenance floor supporting 120+ assets monthly.</li>
 <li>Managed internal resource planning matrices, aligned technician specialization with technical task profiles, and verified end-to-end quality and corporate system documentation compliance.</li>
-<li>Maintained enterprise platform inputs for all in-progress service pipelines, establishing high database entry accuracy and managing client authorizations for system updates.</li>
-<li>Designed technician instructional frameworks and technical standardization documentation that lowered comeback margins and aligned with warranty system requirements.</li></ul>
+<li>Maintained enterprise platform inputs for all in-progress service pipelines, establishing high database entry accuracy and managing client authorizations for system updates.</li></ul>
         </article>
         
         <article class="job">
@@ -231,8 +214,7 @@
             </div>
           </div>
           <ul><li>Held end-to-end contractual P&L and technical inventory tracking liability for a Fortune 500-backed on-site operations initiative, administering high-volume procurement budgets and vendor invoicing.</li>
-<li>Supervised a technical support and inventory team of six, executing performance evaluations, professional skills tracking, and operational standard alignment across a multi-year tenure.</li>
-<li>Overhauled local asset tracking protocols to eliminate stock shortfalls, maintaining 90%+ same-day target achievement while consolidating multi-vendor pipelines to limit infrastructure overhead.</li></ul>
+<li>Supervised a technical support and inventory team of six, executing performance evaluations, professional skills tracking, and operational standard alignment across a multi-year tenure.</li></ul>
         </article>
         
         <article class="job">
@@ -262,8 +244,7 @@
             </div>
           </div>
           <ul><li>Coached and directed a fully remote 13-person Tier 3 advanced technical support team in a 24/7 model handling 500+ complex escalated incidents per week.</li>
-<li>Monitored strict adherence to SLA baselines, qualitative performance metrics, and compliance scorecards; executed targeted technical coaching to lower recurring incident rates.</li>
-<li>Created comprehensive curriculum and conducted deep technical onboarding covering diagnostic procedures, incident recording standards, and compliance frameworks.</li></ul>
+<li>Monitored strict adherence to SLA baselines, qualitative performance metrics, and compliance scorecards; executed targeted technical coaching to lower recurring incident rates.</li></ul>
         </article>
         
       </section>
@@ -277,8 +258,7 @@
         </p>
         <ul><li>Full-Stack & Architecture: Designed a production-grade web ecosystem featuring real-time auction bidding, multi-currency engines, and social elements on containerized cloud infrastructure.</li>
 <li>Database Design: Structured a 42-table relational database schema using Drizzle ORM on TiDB Cloud (MySQL-compatible).</li>
-<li>DevOps & Infrastructure: Git version control, Render automated hosting, GoDaddy DNS routing, Vitest/ESLint/Prettier CI/CD pipelines.</li>
-<li>Core Stack: React 19, TypeScript, Vite, Tailwind CSS, shadcn/ui, Node.js 24, tRPC 11, Hono, JWT, reCAPTCHA.</li></ul>
+<li>DevOps & Infrastructure: Git version control, Render automated hosting, GoDaddy DNS routing, Vitest/ESLint/Prettier CI/CD pipelines.</li></ul>
       </section>
       <section>
         <h2>Education</h2>
