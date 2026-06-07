@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jason Jones - Resume</title>
+  <style>
+    @page {
+      size: letter;
+      margin: 0.4in 0.55in;
+    }
+    :root {
+      --ink: #1a2332;
+      --muted: #4a5568;
+      --accent: #1e5a8a;
+      --accent-soft: #e8f1f8;
+      --line: #d7dee8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Calibri, Arial, sans-serif;
+      color: var(--ink);
+      line-height: 1.35;
+      font-size: 8.8pt;
+      background: #f4f7fb;
+    }
+    .page {
+      max-width: 8.5in;
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 8px 30px rgba(26, 35, 50, 0.08);
+    }
+    header {
+      padding: 18px 28px 14px;
+      border-bottom: 3px solid var(--accent);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+    h1 {
+      font-size: 22pt;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .subtitle {
+      margin-top: 2px;
+      font-size: 11.5pt;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .contact {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      color: var(--muted);
+      font-size: 8.8pt;
+    }
+    .contact a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    main {
+      padding: 14px 28px 18px;
+    }
+    section {
+      margin-bottom: 9px;
+    }
+    .summary {
+      font-size: 9pt;
+    }
+    h2 {
+      font-size: 10pt;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 2px;
+      margin-bottom: 6px;
+    }
+    p { color: var(--ink); }
+    .summary { color: var(--muted); }
+    ul {
+      padding-left: 18px;
+    }
+    li {
+      margin-bottom: 3px;
+      color: var(--ink);
+    }
+    .skills-inline {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      padding: 6px 9px;
+      border-radius: 3px;
+      font-size: 8.4pt;
+      line-height: 1.35;
+      color: var(--ink);
+    }
+    .job {
+      margin-bottom: 9px;
+      page-break-inside: avoid;
+    }
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+    .job h3 {
+      font-size: 10pt;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .company {
+      color: var(--muted);
+      font-size: 9pt;
+      margin-top: 1px;
+    }
+    .job-meta {
+      text-align: right;
+      color: var(--muted);
+      font-size: 8.8pt;
+      white-space: nowrap;
+    }
+    .job-meta span {
+      display: block;
+    }
+    .project-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .project-links {
+      color: var(--muted);
+      font-size: 9.5pt;
+      margin-bottom: 6px;
+    }
+    .project-links a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .education {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>JASON JONES</h1>
+      <p class="subtitle">Systems Administrator & DevOps Engineer</p>
+      <div class="contact">
+        <span>Sioux Falls, SD</span>
+        <span>303-885-2018</span>
+        <span><a href="mailto:jasonjones21@att.net">jasonjones21@att.net</a></span>
+        <span><a href="https://github.com/RamenAnime">github.com/RamenAnime</a></span>
+        <span><a href="https://ramenanime.com">ramenanime.com</a></span>
+      </div>
+    </header>
+    <main>
+      <section>
+        <h2>Professional Summary</h2>
+        <p class="summary">Systems Administrator and DevOps Engineer with 12+ years of experience managing multi-site IT infrastructure, enterprise servers, high-availability networks, and cross-functional operations. Proven track record replacing manual workflows with custom automation, full-stack software, and CI/CD pipelines. Experienced in security incident response, SIEM deployment, firewall forensics, and third-party compliance coordination during active breach investigations. Strong bridge between engineering execution and frontline technical operations with a focus on reliability, uptime, and measurable operational outcomes.</p>
+      </section>
+      <section>
+        <h2>Core Skills</h2>
+        <p class="skills-inline">Windows Server, Linux, UniFi, VLAN, CI/CD, Git, Docker, Python, SonicWall, Wazuh SIEM, Firewall Forensics, React, TypeScript, Node.js, MySQL, tRPC, TrueNAS, Karmak DMS, Multi-Site Infrastructure, Incident Response, SLA Management, Vendor Coordination</p>
+      </section>
+      <section>
+        <h2>Professional Experience</h2>
+        
+        <article class="job">
+          <div class="job-header">
+            <div>
+              <h3>Systems Administrator, DevOps Engineer & Incident Responder</h3>
+              <p class="company">Kenworth of Jacksonville / PacLease</p>
+            </div>
+            <div class="job-meta">
+              <span>Garden City, GA</span>
+              <span>2024 - Present</span>
+            </div>
+          </div>
+          <ul><li>Serve as sole IT Administrator overseeing multi-site production infrastructure across two regional locations; deployed UniFi network topologies, managed VLAN routing, and architected localized secure data access layers.</li>
+<li>Lead active cybersecurity incident response: analyzed SonicWall GMS firewall forensics identifying malware-contacting endpoints, VPN-bypass hosts, a data-harvesting browser extension (ntp2.mywavehome.net / wavebrowser), and an attack-initiating internal host; coordinate with firewall vendor and third-party compliance team on forensics timeline and scope. Direct Wazuh SIEM deployment for ongoing endpoint monitoring.</li>
+<li>Engineered, tested, and deployed a custom digital dispatch system, owning the full software lifecycle from development through production, eliminating business status lag and manual paper workflows.</li>
+<li>Perform complete system administration for the enterprise Dealer Management System (Karmak DMS), overseeing access management, data reporting, workflow compliance, and complex transaction tracking.</li>
+<li>Manage hardware lifecycle pipelines including bare-metal server configuration, workstation deployment, and client configuration, reducing technical response intervals from days to under two hours.</li></ul>
+        </article>
+        
+        <article class="job">
+          <div class="job-header">
+            <div>
+              <h3>Systems Coordinator & Shop Foreman</h3>
+              <p class="company">MHC Kenworth</p>
+            </div>
+            <div class="job-meta">
+              <span>Savannah, GA</span>
+              <span>2022 - 2024</span>
+            </div>
+          </div>
+          <ul><li>Promoted from service tracking to operations foreman to orchestrate technological execution, resource distribution, and technical workflows for a high-output maintenance floor supporting 120+ assets monthly.</li>
+<li>Managed internal resource planning matrices, aligned technician specialization with technical task profiles, and verified end-to-end quality and corporate system documentation compliance.</li>
+<li>Maintained enterprise platform inputs for all in-progress service pipelines, establishing high database entry accuracy and managing client authorizations for system updates.</li></ul>
+        </article>
+        
+        <article class="job">
+          <div class="job-header">
+            <div>
+              <h3>Site Operations Manager</h3>
+              <p class="company">Genuine Parts Company (IBS) / Liberty County School District</p>
+            </div>
+            <div class="job-meta">
+              <span>Hinesville, GA</span>
+              <span>2019 - 2022</span>
+            </div>
+          </div>
+          <ul><li>Held end-to-end contractual P&L and technical inventory tracking liability for a Fortune 500-backed on-site operations initiative, administering high-volume procurement budgets and vendor invoicing.</li>
+<li>Supervised a technical support and inventory team of six, executing performance evaluations, professional skills tracking, and operational standard alignment across a multi-year tenure.</li></ul>
+        </article>
+        
+        <article class="job">
+          <div class="job-header">
+            <div>
+              <h3>Service Operations Manager</h3>
+              <p class="company">Express Oil Change & Tire Engineers</p>
+            </div>
+            <div class="job-meta">
+              <span>Savannah, GA</span>
+              <span>2017 - 2019</span>
+            </div>
+          </div>
+          <ul><li>Directed multi-shift technical facility operations, managing team schedules, workflow execution paths, systemic safety parameters, and customer-facing technical support channels.</li>
+<li>Elevated site throughput and customer validation trends through workflow standardization and direct SLA compliance.</li></ul>
+        </article>
+        
+        <article class="job">
+          <div class="job-header">
+            <div>
+              <h3>Remote Technical Support Coach & Tier 3 Case Manager</h3>
+              <p class="company">DISH Network</p>
+            </div>
+            <div class="job-meta">
+              <span>Remote</span>
+              <span>2012 - 2017</span>
+            </div>
+          </div>
+          <ul><li>Coached and directed a fully remote 13-person Tier 3 advanced technical support team in a 24/7 model handling 500+ complex escalated incidents per week.</li>
+<li>Monitored strict adherence to SLA baselines, qualitative performance metrics, and compliance scorecards; executed targeted technical coaching to lower recurring incident rates.</li></ul>
+        </article>
+        
+      </section>
+      <section>
+        <h2>Technical Projects</h2>
+        <p class="project-title">Ramen Anime | Global Collectibles Marketplace & Social Platform</p>
+        <p class="project-links">
+          <a href="https://github.com/RamenAnime/RamenAnime-Portfolio">github.com/RamenAnime/RamenAnime-Portfolio</a>
+          &nbsp;|&nbsp;
+          <a href="https://ramenanime.com">ramenanime.com</a>
+        </p>
+        <ul><li>Full-Stack & Architecture: Designed a production-grade web ecosystem featuring real-time auction bidding, multi-currency engines, and social elements on containerized cloud infrastructure.</li>
+<li>Database Design: Structured a 42-table relational database schema using Drizzle ORM on TiDB Cloud (MySQL-compatible).</li>
+<li>DevOps & Infrastructure: Git version control, Render automated hosting, GoDaddy DNS routing, Vitest/ESLint/Prettier CI/CD pipelines.</li></ul>
+      </section>
+      <section>
+        <h2>Education</h2>
+        <p class="education">Associate of Arts, Communication Studies | American Public University System</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
