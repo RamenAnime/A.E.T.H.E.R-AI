@@ -31,3 +31,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# KARAKURI is a separate repo (github.com/RamenAnime/Karakuri)
+karakuri/
+karakuri-sync/
