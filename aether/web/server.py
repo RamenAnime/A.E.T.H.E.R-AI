@@ -21,7 +21,7 @@ from aether.integrations.printer_factory import get_printer
 from aether.integrations.printer_profiles import get_profile
 from aether.knowledge.store import KnowledgeStore
 from aether.capabilities import describe_capabilities
-from aether.llm.ollama_client import OllamaClient
+from aether.llm.factory import build_router
 from aether.llm.router import ModelRouter
 from aether.constants import AETHER_ACRONYM_FULL, AETHER_ACRONYM_LINE, AETHER_NAME
 from aether.persona import boot_greeting, build_persona, time_greeting
@@ -112,7 +112,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
     )
 
     app.state.settings = settings
-    app.state.llm = OllamaClient(model=settings.ollama_model, host=settings.ollama_host)
+    app.state.llm = build_router(settings)
     app.state.traces = TraceStore(settings.traces_db)
     app.state.sessions: Dict[str, List[Dict[str, str]]] = {}
     app.state.workflow_running = False
@@ -121,22 +121,25 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
 
     @app.get("/api/health")
     async def health() -> Dict[str, Any]:
-        llm: OllamaClient = app.state.llm
-        ok = await asyncio.to_thread(llm.ping)
+        router: ModelRouter = app.state.llm
+        ok = await asyncio.to_thread(router.ping)
         return {
             "status": "ok" if ok else "degraded",
-            "ollama": ok,
+            "llm_backend": settings.llm_backend,
+            "deepseek_configured": bool(settings.deepseek_api_key),
             "model": settings.ollama_model,
+            "routing": router.routing_table(),
             "version": "3.0.0",
         }
 
     @app.get("/api/models")
     async def models() -> Dict[str, Any]:
-        llm: OllamaClient = app.state.llm
-        names = await asyncio.to_thread(llm.list_models)
+        router: ModelRouter = app.state.llm
+        names = await asyncio.to_thread(router.list_models)
+        default = router.resolve("general")
         return {
             "data": [{"id": n, "name": n} for n in names],
-            "default": settings.ollama_model,
+            "default": default,
         }
 
     @app.get("/api/agents/status")
@@ -186,7 +189,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
         if control is not None and control.state.value in ("running", "paused", "stopping"):
             raise HTTPException(409, "Autonomous agent already running")
 
-        llm: OllamaClient = app.state.llm
+        llm: ModelRouter = app.state.llm
         if not await asyncio.to_thread(llm.ping):
             raise HTTPException(503, "Ollama is not running")
 
@@ -297,7 +300,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
         except Exception as exc:
             info["error"] = str(exc)
 
-        llm: OllamaClient = app.state.llm
+        llm: ModelRouter = app.state.llm
         info["ollama_online"] = await asyncio.to_thread(llm.ping)
         printer = get_printer(settings)
         info["printer_configured"] = printer.is_configured()
@@ -407,7 +410,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
     async def learn_deep(body: LearnRequest) -> StreamingResponse:
         if app.state.workflow_running:
             raise HTTPException(409, "Busy")
-        llm: OllamaClient = app.state.llm
+        llm: ModelRouter = app.state.llm
         if not await asyncio.to_thread(llm.ping):
             raise HTTPException(503, "Ollama is not running")
 
@@ -438,7 +441,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
     async def build_project(body: BuildRequest) -> StreamingResponse:
         if app.state.workflow_running:
             raise HTTPException(409, "Busy")
-        llm: OllamaClient = app.state.llm
+        llm: ModelRouter = app.state.llm
         if not await asyncio.to_thread(llm.ping):
             raise HTTPException(503, "Ollama is not running")
 
@@ -474,18 +477,20 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
 
     @app.post("/api/chat")
     async def chat(body: ChatRequest) -> StreamingResponse:
-        llm: OllamaClient = app.state.llm
-        if not await asyncio.to_thread(llm.ping):
-            raise HTTPException(503, "Ollama is not running. Start Ollama and pull a model.")
+        router: ModelRouter = app.state.llm
+        if not await asyncio.to_thread(router.ping):
+            raise HTTPException(503, "No LLM backend is reachable. Run: aether doctor")
 
         messages = [{"role": m.role, "content": m.content} for m in body.messages]
         if not messages:
             raise HTTPException(400, "No messages")
-        model = body.model or settings.ollama_model
+        model = body.model or router.resolve("chat")
         persona = build_persona(settings.persona, settings.assistant_name, settings.user_title)
         system = persona.system_prompt
         if messages[0]["role"] != "system":
             messages = [{"role": "system", "content": system}, *messages]
+
+        use_cloud_stream = router.supports_cloud_stream(model)
 
         async def stream() -> AsyncGenerator[str, None]:
             full = []
@@ -495,12 +500,16 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
 
             def _producer() -> None:
                 try:
-                    import ollama
-
-                    for chunk in ollama.chat(model=model, messages=messages, stream=True):
-                        delta = chunk.get("message", {}).get("content", "")
-                        if delta:
+                    if use_cloud_stream:
+                        for delta in router.chat_stream(messages, model=model, task="chat"):
                             loop.call_soon_threadsafe(queue.put_nowait, delta)
+                    else:
+                        import ollama
+
+                        for chunk in ollama.chat(model=model, messages=messages, stream=True):
+                            delta = chunk.get("message", {}).get("content", "")
+                            if delta:
+                                loop.call_soon_threadsafe(queue.put_nowait, delta)
                 except Exception as exc:
                     loop.call_soon_threadsafe(queue.put_nowait, exc)
                 finally:
@@ -529,7 +538,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
 
         if body.stream:
             return StreamingResponse(stream(), media_type="text/event-stream")
-        text = await asyncio.to_thread(llm.chat, messages, model)
+        text = await asyncio.to_thread(router.chat, messages, task="chat", model=model)
         return StreamingResponse(
             iter([_sse("message", {"choices": [{"delta": {"content": text}}]})]),
             media_type="text/event-stream",
@@ -540,7 +549,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
         if app.state.workflow_running:
             raise HTTPException(409, "A workflow is already running")
 
-        llm: OllamaClient = app.state.llm
+        llm: ModelRouter = app.state.llm
         if not await asyncio.to_thread(llm.ping):
             raise HTTPException(503, "Ollama is not running")
 

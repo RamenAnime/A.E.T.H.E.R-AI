@@ -59,12 +59,19 @@ class Settings:
     build_dir: str = "./data/builds"
     homeassistant_url: str = ""
     homeassistant_token: str = ""
+    deepseek_api_key: str = ""
+    deepseek_base_url: str = "https://api.deepseek.com"
+    deepseek_model: str = "deepseek-chat"
+    deepseek_code_model: str = "deepseek-coder"
+    llm_backend: str = "ollama"  # ollama | deepseek | hybrid
 
     @classmethod
     def from_env(cls) -> "Settings":
         allowed = _split_paths(os.getenv("ALLOWED_ROOTS", "~/Desktop,~/Documents,~/Projects"))
         expanded = [str(Path(p).expanduser()) for p in allowed]
         data_dir = os.getenv("AETHER_DATA_DIR", "./data")
+        deepseek_api_key = os.getenv("DEEPSEEK_API_KEY", "")
+        default_backend = "hybrid" if deepseek_api_key.strip() else "ollama"
         return cls(
             elevenlabs_api_key=os.getenv("ELEVENLABS_API_KEY", ""),
             elevenlabs_voice_id=os.getenv("ELEVENLABS_VOICE_ID", "HBr48ROZd1B2dv74C8bN"),
@@ -97,6 +104,11 @@ class Settings:
             build_dir=os.getenv("AETHER_BUILD_DIR", f"{data_dir}/builds"),
             homeassistant_url=os.getenv("HOMEASSISTANT_URL", ""),
             homeassistant_token=os.getenv("HOMEASSISTANT_TOKEN", ""),
+            deepseek_api_key=deepseek_api_key,
+            deepseek_base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+            deepseek_model=os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
+            deepseek_code_model=os.getenv("DEEPSEEK_CODE_MODEL", "deepseek-coder"),
+            llm_backend=os.getenv("LLM_BACKEND", default_backend).strip().lower(),
         )
 
 

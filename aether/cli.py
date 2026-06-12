@@ -9,6 +9,7 @@ from pathlib import Path
 
 from aether.config import Settings, ensure_dirs
 from aether.harness import AgentHarness, AgentRole, Workflow
+from aether.llm.factory import build_router
 from aether.llm.ollama_client import OllamaClient
 from aether.pipeline.orchestrator import MasterPipeline
 from aether.traces.store import TraceStore
@@ -22,19 +23,34 @@ def _package_root() -> Path:
 def cmd_doctor(settings: Settings) -> int:
     print("A.E.T.H.E.R. doctor\n")
     llm = OllamaClient(model=settings.ollama_model, host=settings.ollama_host)
+    router = build_router(settings, llm)
     ok = llm.ping()
     print(f"  Ollama ({settings.ollama_host}): {'OK' if ok else 'NOT REACHABLE'}")
     if ok:
         models = llm.list_models()
-        print(f"  Models: {', '.join(models[:8]) or '(none pulled)'}")
+        print(f"  Local models: {', '.join(models[:8]) or '(none pulled)'}")
+    if settings.deepseek_api_key:
+        from integrations.deepseek.client import DeepSeekClient
+
+        cloud = DeepSeekClient(
+            api_key=settings.deepseek_api_key,
+            base_url=settings.deepseek_base_url,
+            model=settings.deepseek_model,
+            code_model=settings.deepseek_code_model,
+        )
+        cloud_ok = cloud.ping()
+        print(
+            f"  DeepSeek ({settings.deepseek_base_url}): "
+            f"{'OK' if cloud_ok else 'NOT REACHABLE'} (backend: {settings.llm_backend})"
+        )
+    else:
+        print("  DeepSeek: not configured (optional: integrations/deepseek/README.md)")
+    print(f"  LLM backend: {settings.llm_backend}")
     print(f"  ElevenLabs key: {'set' if settings.elevenlabs_api_key else 'missing (console TTS fallback)'}")
     print(f"  Persona: {settings.persona} (name: {settings.assistant_name}, addresses you as '{settings.user_title}', wake word '{settings.wake_word}')")
     print(f"  AirLLM: {'enabled' if settings.use_airllm else 'disabled'}")
-    if ok:
-        from aether.llm.router import ModelRouter
-
-        table = ModelRouter(settings, llm).routing_table()
-        print(f"  Model routing: {table}")
+    if router.ping():
+        print(f"  Model routing: {router.routing_table()}")
     home_set = bool(settings.homeassistant_url and settings.homeassistant_token)
     print(f"  Smart home: {'configured' if home_set else 'not configured (set HOMEASSISTANT_* in .env)'}")
     print(f"  Build output dir: {settings.build_dir}")
@@ -49,17 +65,19 @@ def cmd_doctor(settings: Settings) -> int:
         print(f"  Printer API ({pr.backend_type}): {'OK' if pr.ping() else 'not reachable'} ({pr.base_url})")
     else:
         print("  Printer API: not configured (optional: see docs/ENDER3_V3.md)")
-    if not ok:
+    if not router.ping():
         print("\nInstall Ollama: https://ollama.com/download")
         print(f"Then run: ollama pull {settings.ollama_model}")
+        if settings.deepseek_api_key:
+            print("Or fix DeepSeek: check DEEPSEEK_API_KEY in .env")
         return 1
     return 0
 
 
 def cmd_chat(settings: Settings, message: str, speak: bool) -> int:
-    llm = OllamaClient(model=settings.ollama_model, host=settings.ollama_host)
-    if not llm.ping():
-        print("Ollama is not running. Start Ollama and run: aether doctor")
+    router = build_router(settings)
+    if not router.ping():
+        print("No LLM backend is reachable. Run: aether doctor")
         return 1
     from aether.persona import boot_greeting, build_persona
 
@@ -68,7 +86,7 @@ def cmd_chat(settings: Settings, message: str, speak: bool) -> int:
     traces = TraceStore(settings.traces_db)
     if speak and voice:
         voice.speak(boot_greeting(persona))
-    reply = llm.complete(message, system=persona.system_prompt)
+    reply = router.complete(message, system=persona.system_prompt, task="chat")
     print(reply)
     traces.log("chat", "completed", payload=message[:500], agent="cli")
     if speak and voice:

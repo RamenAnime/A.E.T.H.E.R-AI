@@ -47,7 +47,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["aether*"]
+include = ["aether*", "integrations*"]
 
 [tool.setuptools.package-data]
 "aether.web" = ["static/**/*", "static/icons/*"]
